@@ -1,0 +1,10 @@
+main {
+    height: 100vh;
+    width: 100vw;
+}
+
+/* applies to current weather section */
+#current-section {
+    height: 275px;
+    background-color: #d3d3d3;
+}
