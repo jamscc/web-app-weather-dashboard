@@ -59,3 +59,95 @@ currentWeather.append(sectionCurrentHeading, cityDateHeading, infoTemp, infoWind
 var sectionForecastHeading = $('<h2>Five Day Forecast</h2>');
 var divForecastDays = $('<div class="row justify-content-center">');
 forecastWeather.append(sectionForecastHeading, divForecastDays);
+
+// for search
+var citySearchName;
+// source of data: https://openweathermap.org/api
+var keyOpenW = "4b473443b5c6795af3c6b075e5849721";
+
+var startingDate;
+var convertedTZone;
+
+// get data
+function getData() {
+
+    messageOutput.empty();
+
+    citySearchName = searchInput.val();
+
+    // source: https://openweathermap.org/api
+    var apiCurrentURL = "https://api.openweathermap.org/data/2.5/weather?q=" + citySearchName + "&units=imperial" + "&appid=" + keyOpenW;
+
+    fetch(apiCurrentURL)
+        .then((response) => {
+            if (response.ok) {
+                response.json().then((data) => { dataCurrentDisplay(data, citySearchName) });
+            } else {
+                messageOutput.text(response.statusText).attr('style', 'background: red; width: 75%');
+                searchInput.val('');
+                return;
+            }
+        })
+        .catch((error) => {
+            messageOutput.text(error).attr('style', 'background: red; width: 75%');
+            searchInput.val('');
+            return;
+        });
+}
+
+// submit and get data 
+searchSection.on('submit', function (event) {
+    event.preventDefault();
+
+    // if there is no input
+    if (searchInput.val() == "") {
+        messageOutput.text("please enter a city name").attr('style', 'background: red; width: 75%');
+        return;
+    };
+
+    getData();
+})
+
+//  to display current weather info
+function dataCurrentDisplay(data, citySearchName) {
+
+    if (!data.main || !data.wind || !data) {
+        messageOutput.text("Only some data / no data is available").attr('style', 'background: red; width: 75%');
+        searchInput.val('');
+        return;
+    } else {
+        searchInput.val('');
+
+        // conversion to minutes
+        var tZone = ["-14400", "-18000", "-21600", "-25200", "-36000", "-28800"];
+        var conversionToMinutes = [-240, -300, -360, -420, -600, -480];
+        var indexTZ;
+
+        switch (true) {
+            case (tZone.includes(data.timezone)):
+                indexTZ = tZone.indexOf(data.timezone);
+                convertedTZone = conversionToMinutes[indexTZ];
+                break;
+            default:
+                tZone.push(data.timezone);
+                conversionToMinutes.push(data.timezone / 60);
+                indexTZ = tZone.indexOf(data.timezone);
+                convertedTZone = conversionToMinutes[indexTZ];
+        };
+
+        // Moment.js
+        startingDate = moment.unix(data.dt).utc().utcOffset(convertedTZone).format('MMM DD, YYYY');
+
+        // display city name and date
+        cityDateHeading.text(data.name + " | " + startingDate);
+
+        // weather icon
+        var todaysWeatherIcon = data.weather[0].icon;
+        cityDateHeading.append($("<img id='today-weather-icon' src='http://openweathermap.org/img/wn/" + todaysWeatherIcon + "@2x.png'>"));
+
+        // temperature, wind speed, and humidity
+        infoTemp.text("Temperature: " + Math.round(data.main.temp) + "\u2109");
+        infoWind.text("Wind Speed: " + Math.round(data.wind.speed) + " MPH");
+        infoHumidity.text("Humidity: " + Math.round(data.main.humidity) + "%");
+    };
+}
