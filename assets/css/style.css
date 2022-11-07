@@ -9,9 +9,31 @@ main {
     background-color: #d3d3d3;
 }
 
+#current-section p {
+    margin-bottom: 6px;
+}
+
 #today-weather-icon {
     width: 75px;
     height: 75px;
+}
+
+li {
+    list-style-type: none;
+}
+
+/* applies to search history */
+.cities-searched {
+    width: 75%;
+    margin: 2em 2em 2em 0;
+    padding: 1em;
+    background-color: #d3d3d3;
+}
+
+/* applies to search history */
+.cities-searched:hover {
+    cursor: pointer;
+    background-color: #faebd7;
 }
 
 /* applies to where forecast info is displayed */
