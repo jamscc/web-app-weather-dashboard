@@ -8,3 +8,26 @@ main {
     height: 275px;
     background-color: #d3d3d3;
 }
+
+#today-weather-icon {
+    width: 75px;
+    height: 75px;
+}
+
+/* applies to where forecast info is displayed */
+.five-days {
+    height: 200px;
+    text-align: center;
+    background-color: #cdc5c5ed;
+}
+
+/* forecast weather icons */
+#icons-weather {
+    height: 50px;
+    width: 50px;
+    margin: 0 auto;
+}
+
+.forecast-data {
+    font-size: .9em;
+}
