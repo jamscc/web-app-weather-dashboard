@@ -158,8 +158,24 @@ function dataCurrentDisplay(data, citySearchName) {
         lat = data.coord.lat;
         long = data.coord.lon;
         dataForecast(lat, long);
+
+        // add to search history if new search
+        if (($.inArray(citySearchName, searchedHistory)) == -1) {
+            searchedHistory.push(citySearchName);
+        };
+        // local storage
+        localStorage.setItem("searchedCitiesHistory", JSON.stringify(searchedHistory));
+
+        // display search history
+        displaySearchHistory();
     };
 }
+
+// display search history
+function displaySearchHistory() {
+
+}
+
 
 // get forecast data using coordinates
 function dataForecast(lat, long) {
@@ -188,8 +204,8 @@ function dataForecast(lat, long) {
 function dataForecastDisplay(data) {
     divForecastDays.empty();
 
-    if (!data.list.length || !data) {
-        messageOutput.text("no data is available").attr('style', 'background: red; width: 75%');
+    if (!data.list.length || !data || (data.list.length < 40)) {
+        messageOutput.text("Only some data / no data is available").attr('style', 'background: red; width: 75%');
         searchInput.val('');
         return;
     };
