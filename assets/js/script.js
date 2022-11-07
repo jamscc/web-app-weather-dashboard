@@ -72,12 +72,32 @@ var convertedTZone;
 var lat;
 var long;
 
+// for search history
+var searchInputVal;
+var selectFromHistory = false;
+
+var defaultSearch;
+
 // get data
 function getData() {
 
     messageOutput.empty();
 
-    citySearchName = searchInput.val();
+    switch (true) {
+        // if selecting from search history
+        case (selectFromHistory):
+            citySearchName = searchInputVal;
+            selectFromHistory = !selectFromHistory;
+            break;
+        // if new search
+        case (searchInput.val() != ""):
+            citySearchName = searchInput.val();
+            break;
+        default:
+            // for initial display
+            citySearchName = "New York";
+            defaultSearch = true;
+    }
 
     // source: https://openweathermap.org/api
     var apiCurrentURL = "https://api.openweathermap.org/data/2.5/weather?q=" + citySearchName + "&units=imperial" + "&appid=" + keyOpenW;
@@ -160,22 +180,39 @@ function dataCurrentDisplay(data, citySearchName) {
         dataForecast(lat, long);
 
         // add to search history if new search
-        if (($.inArray(citySearchName, searchedHistory)) == -1) {
+        if (($.inArray(citySearchName, searchedHistory)) == -1 && defaultSearch == false) {
             searchedHistory.push(citySearchName);
         };
+        
         // local storage
         localStorage.setItem("searchedCitiesHistory", JSON.stringify(searchedHistory));
 
         // display search history
         displaySearchHistory();
+        defaultSearch = false;
     };
 }
 
 // display search history
 function displaySearchHistory() {
 
-}
+    searchedCitiesList.empty();
 
+    // get from local storage and display search history 
+    var storedCities = JSON.parse(localStorage.getItem("searchedCitiesHistory"));
+
+    if (storedCities == null) {
+        return;
+    } else {
+        for (var i = 0; i < storedCities.length; i++) {
+            var eachListItem = $("<li class='cities-searched'>");
+            eachListItem.text(storedCities[i]);
+            searchedCitiesList.append(eachListItem);
+        };
+        searchedHistory = storedCities;
+        return searchedHistory;
+    };
+}
 
 // get forecast data using coordinates
 function dataForecast(lat, long) {
@@ -240,4 +277,17 @@ function dataForecastDisplay(data) {
         eachForecastDay.append($("<p class='text-body m-0 forecast-data'> W: " + Math.round(data.list[indexArray[i]].wind.speed) + " MPH" + "</p>"));
         eachForecastDay.append($("<p class='text-body m-0 forecast-data'> H: " + Math.round(data.list[indexArray[i]].main.humidity) + "%" + "</p>"));
     };
-};
+}
+
+// display search history and get data for initial display
+displaySearchHistory();
+getData();
+
+// search from search history
+searchedCitiesList.on('click', 'li', (event) => {
+    var cityNameSearched = $(event.target).text();
+    searchInputVal = cityNameSearched;
+    selectFromHistory = true;
+    // get data
+    getData();
+})
